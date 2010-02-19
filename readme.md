@@ -6,7 +6,7 @@ Ever want to keep an eye on a particular server or a number of servers without h
 
 Just checkout to your server somewhere:
 
-  git clone git://github.com/watsonian/loadwatch.git
+    git clone git://github.com/watsonian/loadwatch.git
 
 That's it!
 
@@ -29,21 +29,21 @@ When the script actually triggers, it will log the process list to this log file
 
 If you want to run the script in the foreground you can do so by executing it like this:
 
-  ./load.sh --
+    ./load.sh --
 
 ## Customization
 
 There are a number of variables you can adjust to suit your needs. Here are the defaults:
 
-  CMDOUT_LOG="load.cmd.log"
-  STDOUT_LOG="load.std.log"
-  ERROR_LOG="load.err.log"
-  MAX_INITIAL=20.00
-  MAX=$MAX_INITIAL
-  RUNS=0
-  MAX_RUNS=12 # to get minutes: $MAX_RUNS / (60 / $SLEEP_TIME)
-  SLEEP_TIME=30
-  COMMAND="ps aux --sort=-pcpu"
+    CMDOUT_LOG="load.cmd.log"
+    STDOUT_LOG="load.std.log"
+    ERROR_LOG="load.err.log"
+    MAX_INITIAL=20.00
+    MAX=$MAX_INITIAL
+    RUNS=0
+    MAX_RUNS=12 # to get minutes: $MAX_RUNS / (60 / $SLEEP_TIME)
+    SLEEP_TIME=30
+    COMMAND="ps aux --sort=-pcpu"
 
 The log variables are fairly self-explanatory.
 
@@ -63,6 +63,6 @@ The log variables are fairly self-explanatory.
 
 So, now you have a nice log file containing *ps aux* output from high load times on your server. That's great and all, but it would be great if you could quickly get an idea of which users might be causing the most trouble to get a quick idea of where to look. Try this on for size:
 
-  grep -A 100 "USER" load.cmd.log | awk '{print $1}' | sort | uniq -c | sort -n | tail -20
+    grep -A 100 "USER" load.cmd.log | awk '{print $1}' | sort | uniq -c | sort -n | tail -20
 
 Basically, that greps for the header column of each *ps aux* dump and grabs the first 100 lines of that dump (which is the highest CPU processes running at the time), it then pipes it to awk and pulls out the username, sorts it, gets a unique count of each username, sorts it numerically, and grabs the top 20 users. All this is really doing is showing you a sorted count of how many processes each user had running in the top 100 CPU processes during high load times, but that can prove quite helpful!
