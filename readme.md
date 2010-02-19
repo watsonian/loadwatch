@@ -66,3 +66,9 @@ So, now you have a nice log file containing *ps aux* output from high load times
     grep -A 100 "USER" load.cmd.log | awk '{print $1}' | sort | uniq -c | sort -n | tail -20
 
 Basically, that greps for the header column of each *ps aux* dump and grabs the first 100 lines of that dump (which is the highest CPU processes running at the time), it then pipes it to awk and pulls out the username, sorts it, gets a unique count of each username, sorts it numerically, and grabs the top 20 users. All this is really doing is showing you a sorted count of how many processes each user had running in the top 100 CPU processes during high load times, but that can prove quite helpful!
+
+Another useful one is this one:
+
+    grep -A 100 "USER" load.cmd.log | grep -v USER | sed 's/  */ /g' | cut -f11- -d ' ' | sort | uniq -c | sort -n | tail -20
+
+That one will get you a list of the processes being executed the most across all process dumps.
