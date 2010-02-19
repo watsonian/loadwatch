@@ -14,7 +14,7 @@ That's it!
 
 To get started, just execute the script:
 
-  ./load.sh
+    ./load.sh
 
 That will fire it up and it will start monitoring in the background. When you do this, two logs will be created:
 
