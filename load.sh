@@ -12,7 +12,7 @@ COMMAND="ps aux --sort=-pcpu"
 
 # Background script if "--" isn't first argument
 if [ "x$1" != "x--" ]; then
-  $0 -- 1> $STDOUT_LOG 2> $ERROR_LOG &
+  $0 -- 1>> $STDOUT_LOG 2>> $ERROR_LOG &
   exit 0
 fi
 
