@@ -35,15 +35,17 @@ If you want to run the script in the foreground you can do so by executing it li
 
 There are a number of variables you can adjust to suit your needs. Here are the defaults:
 
-    CMDOUT_LOG="load.cmd.log"
-    STDOUT_LOG="load.std.log"
-    ERROR_LOG="load.err.log"
-    MAX_INITIAL=20.00
-    MAX=$MAX_INITIAL
-    RUNS=0
-    MAX_RUNS=12 # to get minutes: $MAX_RUNS / (60 / $SLEEP_TIME)
-    SLEEP_TIME=30
-    COMMAND="ps aux --sort=-pcpu"
+```shell
+CMDOUT_LOG="load.cmd.log"
+STDOUT_LOG="load.std.log"
+ERROR_LOG="load.err.log"
+MAX_INITIAL=20.00
+MAX=$MAX_INITIAL
+RUNS=0
+MAX_RUNS=12 # to get minutes: $MAX_RUNS / (60 / $SLEEP_TIME)
+SLEEP_TIME=30
+COMMAND="ps aux --sort=-pcpu"
+```
 
 The log variables are fairly self-explanatory.
 
@@ -72,3 +74,7 @@ Another useful one is this one:
     grep -A 100 "USER" load.cmd.log | grep -v USER | sed 's/  */ /g' | cut -f11- -d ' ' | sort | uniq -c | sort -n | tail -20
 
 That one will get you a list of the processes being executed the most across all process dumps.
+
+## Copyright
+
+Copyright (c) 2012 Joel Watson. See LICENSE for details.
