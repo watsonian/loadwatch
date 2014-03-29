@@ -1,41 +1,94 @@
 #!/bin/bash
+#/ Usage: loadwatch [options]
+#/
+#/
+#/
+#/ OPTIONS:
+#/   -h           Show this message
+#/   -v           Run in verbose mode.
+
+usage() {
+  grep '^#/' <"$0" | cut -c 4-
+}
+
+# Defaults
+STARTING_THRESHOLD=20.00
+CURRENT_THRESHOLD=$STARTING_THRESHOLD
+MAX_RUNS=12
+RUNS=0
+SLEEP_TIME=30
+DAEMON=0
+
+while getopts "hvt:m:s:d" OPTION; do
+  case $OPTION in
+    h)
+      usage
+      exit
+      ;;
+    d)
+      DAEMON=1
+      ;;
+    t)
+      STARTING_THRESHOLD=$OPTARG
+      CURRENT_THRESHOLD=$STARTING_THRESHOLD
+      ;;
+    m)
+      MAX_RUNS=$OPTARG
+      ;;
+    s)
+      SLEEP_TIME=$OPTARG
+      ;;
+    v)
+      set -x
+      ;;
+    ?)
+      usage
+      exit
+      ;;
+  esac
+done
 
 CMDOUT_LOG="load.cmd.log"
 STDOUT_LOG="load.std.log"
 ERROR_LOG="load.err.log"
-MAX_INITIAL=20.00
-MAX=$MAX_INITIAL
-RUNS=0
-MAX_RUNS=12 # to get minutes: $MAX_RUNS / (60 / $SLEEP_TIME)
-SLEEP_TIME=30
 COMMAND="ps aux --sort=-pcpu"
 
-# Background script if "--" isn't first argument
-if [ "x$1" != "x--" ]; then
-  $0 -- 1>> $STDOUT_LOG 2>> $ERROR_LOG &
-  exit 0
+# re-exec in the background when running as a daemon
+if [ $DAEMON -eq 1 ]; then
+  exec $0 $@ 1>> $STDOUT_LOG 2>> $ERROR_LOG &
+  exit
 fi
 
 echo "[`date \"+%Y/%b/%d %H:%M:%S\"`] starting up..."
 
-while true; do
-  # Read in load average info
+current_load() {
   read LOAD1 LOAD5 LOAD15 PROCS PROCID < /proc/loadavg
-  
-  if [ ${LOAD1/./} -gt ${MAX/./} ]; then
+  echo $LOAD1
+}
+
+load_exceeds_current_threshold() {
+  current_load=$1
+  [ ${current_load/./} -gt ${CURRENT_THRESHOLD/./} ]
+}
+
+
+while true; do
+  load=$(current_load)
+
+  if load_exceeds_current_threshold $load; then
     TIMESTAMP=`date "+%Y/%b/%d %H:%M:%S"`
-    echo "[$TIMESTAMP] load avg increased from $MAX to $LOAD1"
-    echo -e "\n\n[$TIMESTAMP] Active Process Dump at $LOAD1 ==========================================" >> $CMDOUT_LOG
+    echo "[$TIMESTAMP] load avg increased from $CURRENT_THRESHOLD to $load"
+    echo -e "\n\n[$TIMESTAMP] Active Process Dump at $load ==========================================" >> $CMDOUT_LOG
     $COMMAND >> $CMDOUT_LOG
-    MAX=$LOAD1
+    CURRENT_THRESHOLD=$load
   fi
-  
-  # Reset MAX to MAX_INITIAL after running MAX_RUNS times
+
+  # Reset CURRENT_THRESHOLD to STARTING_THRESHOLD after running MAX_RUNS times
   let RUNS+=1
   if [ $RUNS -gt $MAX_RUNS ]; then
     RUNS=1
-    MAX=$MAX_INITIAL
+    CURRENT_THRESHOLD=$STARTING_THRESHOLD
   fi
-  
+
   sleep $SLEEP_TIME
 done
